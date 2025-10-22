@@ -3,7 +3,7 @@ import react from "@vitejs/plugin-react";
 import path from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 
-export default defineConfig({
+export default defineConfig(async () => ({
   plugins: [
     react(),
     runtimeErrorOverlay(),
@@ -11,14 +11,18 @@ export default defineConfig({
     process.env.REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-cartographer").then((m) =>
-            m.cartographer(),
+            m.cartographer()
           ),
           await import("@replit/vite-plugin-dev-banner").then((m) =>
-            m.devBanner(),
+            m.devBanner()
           ),
         ]
       : []),
   ],
+
+  // 👇 this fixes JS/CSS 404s on GitHub Pages
+  base: "/chordchart/",
+
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "client", "src"),
@@ -26,15 +30,20 @@ export default defineConfig({
       "@assets": path.resolve(import.meta.dirname, "attached_assets"),
     },
   },
+
+  // your front‑end source folder
   root: path.resolve(import.meta.dirname, "client"),
+
+  // 👇 put the build where GitHub Pages can see it
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path.resolve(import.meta.dirname, "docs"),
     emptyOutDir: true,
   },
+
   server: {
     fs: {
       strict: true,
       deny: ["**/.*"],
     },
   },
-});
+}));
